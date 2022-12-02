@@ -94,7 +94,7 @@ def play(m, inp = "", note = "", length = 1, serial = False):
             stop2 = True
             buzzer2.stop()
             #print("stop2")
-        if serial and m.record[count3] == 0:
+        if serial and len(m.record) > 0 and m.record[count3] == 0:
             if len(m.r_dur) > count3+step:
                 count3=count3+step
             stop3 = True
@@ -102,7 +102,7 @@ def play(m, inp = "", note = "", length = 1, serial = False):
             s.sendSerialMsg(ser, msg = "roff")
             #rec = False
             #recc = 0
-        if serial and m.compresor[count4] == 0:
+        if serial and len(m.compresor) > 0 and m.compresor[count4] == 0:
             if len(m.c_dur) > count4+step:
                 count4=coun44+step
             stop4 = True
@@ -173,6 +173,7 @@ if __name__ == '__main__':
     length = 1
     #get args
     m = False
+    serial = False
     for i, arg in enumerate(sys.argv):
         print(f"Argument {i:>6}: {arg}")
         if i == 1:
@@ -186,15 +187,20 @@ if __name__ == '__main__':
         inp = input() #3
         print(" loading "+inp)
     #loader = importlib.find_loader(inp)
+    if inp == "freq":
+        m = lambda: None
     if inp == "note":
         #do nothing
 
         m = importlib.import_module( "tones" ) #as m
+    if inp == "note" or inp =="freq":
+        
         m.violin = []
         m.bass = []
         m.record = []
         m.compresor = []
     if not inp == "note" and not inp == "freq" and not inp == "":    
+        serial = True
         loader = importlib.util.find_spec(inp)
         if loader is not None:
             m = importlib.import_module( inp ) #as m
@@ -203,10 +209,7 @@ if __name__ == '__main__':
             sys.exit()
     #import imperial_marsh as m
     #import melody as m
-    serial = False
-    if m and m.record is not None:
-        serial = True
-    print("play:"+inp+" "+note+" "+length+" "+str(serial))
+    print("play:"+inp+" "+note+" "+str(length)+" "+str(serial))
     play(m, inp, note, length, serial)
 # Please find below some addictional commands to change frequency and
 # dutycycle without stopping buzzer, or to stop buzzer:

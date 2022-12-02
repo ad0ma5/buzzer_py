@@ -81,3 +81,6 @@ b_dur  = [
     0, 0, 0, 
 
 ]
+record =[]
+compresor = []
+

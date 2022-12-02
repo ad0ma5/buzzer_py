@@ -449,3 +449,5 @@ b_dur  = [
     8,
     8
 ]
+record =[]
+compresor = []

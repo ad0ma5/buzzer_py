@@ -6,7 +6,12 @@ app = Flask(__name__)
 @app.route("/")
 def hello_world():
     rest = ""
-    notes = dir(m)
+    m_keys = dir(m)
+    mm = [] 
+    for mk in m_keys:
+        mm[mk] = getattr(m,mk)
+    ns = sorted(mm, key=lambda x: x, reverse=False)
+    notes = dir(ns)
     for note in notes:
         if not note.startswith("__"):
             rest = rest + "<div onclick=\"play('"+note+"')\" >"+note+"</div>"
