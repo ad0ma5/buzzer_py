@@ -449,5 +449,9 @@ b_dur  = [
     8,
     8
 ]
-record =[]
+record = []
+r_dur = []
 compresor = []
+c_dir = []
+guitar = []
+g_dur = []

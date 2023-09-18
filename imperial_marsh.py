@@ -72,5 +72,16 @@ b_dur  = [
 
 ]
 
-record = []
-compresor = []
+record = [
+        ]
+r_dur = [
+        ]
+compresor = [
+        ]
+c_dur = [
+        ]
+guitar = [
+
+        ]
+g_dur = [
+        ]

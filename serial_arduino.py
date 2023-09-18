@@ -11,19 +11,23 @@ def closeSerial(ser):
         ser.close()
 
 def connectSerial():
-    ser = serial.Serial('/dev/ttyACM0', 9600, timeout=1)
+    #ser = serial.Serial('/dev/ttyACM0', 9600, timeout=1)
+    ser = serial.Serial('/dev/ttyACM0', 200000, timeout=1)
+    time.sleep(1)
 
     ser.reset_input_buffer()
     #print("send ping")
     ser.write(b"ping")
+    ser.flush()
     if getSerialResponseOK(ser):
-        #print("got pong")
+        print("got pong returning ser")
         return ser
+    print("return False for ser")
     return False
 
 def getSerialResponseOK(ser):
     if ser:
-        #print("ROK?")
+        print("ROK?")
         waiting = True
         while waiting:
             if ser.in_waiting >0:
@@ -31,23 +35,30 @@ def getSerialResponseOK(ser):
                 l = ser.readline()
                 while l:
                     sline = l.decode('utf-8').rstrip()
-                    if sline == "ok" or sline == "pong":
-                        return True
                     print(sline)
+                    if sline == "ok" or sline == "pong":
+                        print("OK")
+                        return True
                     l = ser.readline()
             else:
-                time.sleep(1)
+                time.sleep(0.1)
                 print(".")
-    return False
+    else:
+        return False
 
-def sendSerialMsg(ser, msg, ok = False):
+def sendSerialMsg(ser, msg, ok = True):
 
     if ser:
-        lineb = bytes(msg.rstrip(), 'utf-8')
-        print(lineb)
+        #lineb = bytes(msg.rstrip(), 'utf-8')
+        lineb = bytes(msg, 'utf-8')
+        #print(lineb)
         ser.write(lineb)
+        ser.flush()
         if ok and getSerialResponseOK(ser):
             return True
+        else:
+            return True
+    print("no ser for "+str(msg))
     return False
 
 if __name__ == '__main__':

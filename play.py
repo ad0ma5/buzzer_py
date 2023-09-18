@@ -8,6 +8,8 @@ import serial_arduino as s
 
 def theEnd(ser):
     # cleanup will free PINS and exit will terminate code execution
+    s.sendSerialMsg(ser, "goff", True)
+    time.sleep(1)
     s.sendSerialMsg(ser, "coff", True)
     time.sleep(1)
     s.sendSerialMsg(ser, "roff", True)
@@ -18,14 +20,19 @@ def theEnd(ser):
     #sys.exit()
 
 def serialStart():
-
+    print("connecting serial...")
     ser = s.connectSerial()
+    return ser
 
 def play(m, inp = "", note = "", length = 1, serial = False):
     #print(f"Arguments count: {len(sys.argv)}")
     ser = False
     if serial: 
         ser = serialStart()
+    if ser:
+        print("ser set")
+    else:
+        print("ser NOT set")
     # Set trigger PIN according with your cabling
     triggerPIN1 = 12
     triggerPIN2 = 16
@@ -43,14 +50,17 @@ def play(m, inp = "", note = "", length = 1, serial = False):
     start2 = False
     start3 = False
     start4 = False
+    start5 = False
     stop1 = True
     stop2 = True
     stop3 = True
     stop4 = True
+    stop5 = True
     count1 = 0
     count2 = 0
     count3 = 0
     count4 = 0
+    count5 = 0
     step = 1
 
     rec = False
@@ -77,6 +87,12 @@ def play(m, inp = "", note = "", length = 1, serial = False):
         buzzer2.stop() # Set dutycycle to 10
         theEnd(ser)
         return 1
+    if inp == "serial":
+        s.sendSerialMsg(ser, note)
+        time.sleep(float(length))
+        #s.sendSerialMsg(ser, note[0:1]+"off")
+        theEnd(ser)#sends all off msgs
+        return 1
 
     size = len(m.violin)
     if len(m.bass) > size: 
@@ -94,20 +110,32 @@ def play(m, inp = "", note = "", length = 1, serial = False):
             stop2 = True
             buzzer2.stop()
             #print("stop2")
-        if serial and len(m.record) > 0 and m.record[count3] == 0:
+        if serial == True and len(m.record) > 0 and m.r_dur[count3] == 0:
+            print("rec count3="+str(count3)+" serial="+str(serial)+" data="+str(m.r_dur[count3]))
+            print("stop3")
             if len(m.r_dur) > count3+step:
                 count3=count3+step
             stop3 = True
             #if rec and recc > 2:
-            s.sendSerialMsg(ser, msg = "roff")
+            s.sendSerialMsg(ser, "roff")
             #rec = False
             #recc = 0
-        if serial and len(m.compresor) > 0 and m.compresor[count4] == 0:
+        if serial and len(m.compresor) > 0 and m.c_dur[count4] == 0:
             if len(m.c_dur) > count4+step:
-                count4=coun44+step
+                count4=count4+step
             stop4 = True
             #if com and recc > 2:
-            s.sendSerialMsg(ser, msg = "coff")
+            s.sendSerialMsg(ser, "coff")
+            print("stop4")
+            #com = False
+            #recc = 0
+        if serial and len(m.guitar) > 0 and m.g_dur[count5] == 0:
+            if len(m.g_dur) > count5+step:
+                count5=count5+step
+            stop5 = True
+            #if com and recc > 2:
+            s.sendSerialMsg(ser, "goff")
+            print("stop5")
             #com = False
             #recc = 0
         #print("step")
@@ -127,17 +155,25 @@ def play(m, inp = "", note = "", length = 1, serial = False):
                 stop2 = False
                 start2 = True
         if serial and count3 < len(m.record) and m.r_dur[count3] > 0:
-            #print("play "+str(violin[count1])+" "+str(v_dur[count1]))
+            print("gonna play rec "+str(m.record[count3])+" dur "+str(m.r_dur[count3]))
             m.r_dur[count3] = m.r_dur[count3]-step
             if stop3:
                 stop3 = False
                 start3 = True
         if serial and count4 < len(m.compresor) and m.c_dur[count4] > 0:
+            print("play com "+str(m.compresor[count4])+" dur "+str(m.c_dur[count4]))
             #print("play "+str(violin[count1])+" "+str(v_dur[count1]))
-            m.r_dur[count4] = m.c_dur[count4]-step
+            m.c_dur[count4] = m.c_dur[count4]-step
             if stop4:
                 stop4 = False
                 start4 = True
+        if serial and count5 < len(m.guitar) and m.g_dur[count5] > 0:
+            print("play g "+str(m.guitar[count5])+" dur "+str(m.g_dur[count5]))
+            #print("play "+str(violin[count1])+" "+str(v_dur[count1]))
+            m.g_dur[count5] = m.g_dur[count5]-step
+            if stop5:
+                stop5 = False
+                start5 = True
             
         # this row makes buzzer work for 1 second, then
         if start1 and m.violin[count1] > 0:
@@ -152,14 +188,21 @@ def play(m, inp = "", note = "", length = 1, serial = False):
             #print("sound start2")
         if  serial and start3 and m.record[count3] > 0:
             start3 = False
-            #print("sound start3")
+            print("sound start3")
             #if  rec == False and recc > 0.5:
             #    rec = True
-            s.sendSerialMsg(ser, msg = "rec")
+            if ser:
+                print("ser still ok here")
+            s.sendSerialMsg(ser, "rec")
             #    recc = 0
         if  serial and start4 and m.compresor[count4] > 0:
             start4 = False
-            s.sendSerialMsg(ser, msg = "com1")
+            print("sound start4")
+            s.sendSerialMsg(ser, "com3")
+        if  serial and start5 and m.guitar[count5] > 0:
+            start5 = False
+            print("sound start5")
+            s.sendSerialMsg(ser, "gon")
 
         #time.sleep(0.1*v_dur[count1])
         time.sleep(m.tempo)
@@ -209,7 +252,7 @@ if __name__ == '__main__':
             sys.exit()
     #import imperial_marsh as m
     #import melody as m
-    print("play:"+inp+" "+note+" "+str(length)+" "+str(serial))
+    print("play:"+inp+" "+note+" "+str(length)+" serial="+str(serial))
     play(m, inp, note, length, serial)
 # Please find below some addictional commands to change frequency and
 # dutycycle without stopping buzzer, or to stop buzzer:

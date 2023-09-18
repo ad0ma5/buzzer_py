@@ -81,6 +81,9 @@ b_dur  = [
     0, 0, 0, 
 
 ]
-record =[]
+record = []
+r_dur = []
 compresor = []
-
+c_dir = []
+guitar = []
+g_dur = []

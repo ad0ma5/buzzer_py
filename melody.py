@@ -49,3 +49,9 @@ b_dur  = [
     4,4,
     4,4
 ]
+record = []
+r_dur = []
+compresor = []
+c_dir = []
+guitar = []
+g_dur = []
